@@ -26,3 +26,5 @@ class User(AbstractUser):
 
 class Video(models.Model):
     name = models.CharField(max_length=64)
+    user = models.ForeignKey("User", on_delete=models.CASCADE)
+    amount = models.IntegerField()
