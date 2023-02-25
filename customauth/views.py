@@ -1,5 +1,7 @@
-from django.contrib.auth.views import LoginView
+from django.shortcuts import render
+from django.views import View
 
 
-class UserLoginView(LoginView):
-    ...
+class HomeView(View):
+    def get(self, request):
+        return render(request, "index/home.html")

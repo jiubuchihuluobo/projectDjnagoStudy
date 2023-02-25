@@ -1,8 +1,9 @@
 from django.urls import path
 
-from customauth.views import UserLoginView
+from customauth.views import HomeView
 
 app_name = "customauth"
+
 urlpatterns = [
-    path("login/", UserLoginView.as_view(), name="login")
+    path("index/", HomeView.as_view(), name="home")
 ]
