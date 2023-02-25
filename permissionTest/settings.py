@@ -78,7 +78,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
         'USER': 'qiliu',
-        'PASSWORD': '670921',
+        'PASSWORD': '2wsxCvgy7',
         'OPTIONS': {
             'options': '-c search_path=mydjango'
         },
