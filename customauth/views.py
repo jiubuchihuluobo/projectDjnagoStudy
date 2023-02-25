@@ -4,4 +4,4 @@ from django.views import View
 
 class HomeView(View):
     def get(self, request):
-        return render(request, "index/home.html")
+        return render(request, "customauth/home.html")

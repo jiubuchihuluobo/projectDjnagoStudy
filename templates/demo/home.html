@@ -1,0 +1,9 @@
+{% extends 'demo_base.html' %}
+
+{% block content %}
+    {% for i in info %}
+        <h2>{{ i.title }}</h2>
+        <small>Published on {{ i.published_at }} by {{ i.author }}</small>
+        <p>{{ i.content }}</p>
+    {% endfor %}
+{% endblock %}
