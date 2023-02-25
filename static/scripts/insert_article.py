@@ -30,11 +30,18 @@ for result in results:
     if not user:
         user_info = {
             "username": result.get("author"),
-            "email": "date21092%d@gmail.com" % random.randint(0, 100)
+            "email": "date21092%d@gmail.com" % random.randint(0, 100),
+            "password": "670921",
         }
-        user = User.objects.create(**user_info)
+        user = User.objects.create_user(**user_info)
     if isinstance(user, QuerySet):
         user = user[0]
     result.update({"author": user})
     result.update({"published_at": datetime.datetime.strptime(result.get("published_at"), "%B %d, %Y").strftime("%Y-%m-%d")})
-    Article.objects.create(**result)
+    try:
+        Article.objects.get(title=result.get("title"))
+    except Exception as e:
+        Article.objects.create(**result)
+    else:
+        print("数据重复")
+        continue
