@@ -30,7 +30,7 @@ class CreateView(View):
         if data.is_valid():
             data.save()
             messages.success(request, 'The post has been created successfully.')
-            return redirect("demo:home")
+            return redirect("mydemo:home")
         else:
             messages.error(request, 'Please correct the following errors.')
             return render(request, "demo/create.html", context={"form": data})
@@ -53,7 +53,7 @@ class EditView(View):
         if data.is_valid():
             data.save()
             messages.success(request, 'The post has been created successfully.')
-            return redirect("demo:home")
+            return redirect("mydemo:home")
         else:
             messages.error(request, 'Please correct the following errors.')
             return render(request, "demo/create.html", context={"form": data})
@@ -71,4 +71,4 @@ class DeleteView(View):
         article = get_object_or_404(Article, id=pk)
         article.delete()
         messages.success(request, 'The post has been deleted successfully.')
-        return redirect("demo:home")
+        return redirect("mydemo:home")
