@@ -28,7 +28,7 @@ class HomeView(View):
             user = authenticate(request, username=username, password=password)
             if user:
                 login(request, user)
-                messages.success(request, 'Hi {username.title()}, welcome back!')
+                messages.success(request, 'Hi %s, Welcome back!' % user.username.title())
                 return redirect('mydemo:home')
 
         messages.error(request, 'Invalid username or password!')
