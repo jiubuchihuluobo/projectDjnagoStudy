@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.http import HttpRequest
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
-from demo.forms import ArticleForm
 from demo.models import Article
+from demo.serializers import ArticleForm
 
 
 class HomeView(View):
@@ -25,7 +25,8 @@ class CreateView(View):
         return render(request, "demo/create.html", context)
 
     def post(self, request: HttpRequest):
-        data = ArticleForm(request.POST)
+        # 反序列化
+        data = ArticleForm(data=request.POST)
         if data.is_valid():
             data.save()
             messages.success(request, 'The post has been created successfully.')
@@ -33,3 +34,41 @@ class CreateView(View):
         else:
             messages.error(request, 'Please correct the following errors.')
             return render(request, "demo/create.html", context={"form": data})
+
+
+class EditView(View):
+    def get(self, request: HttpRequest, pk):
+        article = get_object_or_404(Article, id=pk)
+        context = {
+            "id": pk,
+            # 序列化
+            "form": ArticleForm(instance=article)
+        }
+        return render(request, "demo/create.html", context)
+
+    def post(self, request: HttpRequest, pk):
+        article = get_object_or_404(Article, id=pk)
+        # 反序列化
+        data = ArticleForm(data=request.POST, instance=article)
+        if data.is_valid():
+            data.save()
+            messages.success(request, 'The post has been created successfully.')
+            return redirect("demo:home")
+        else:
+            messages.error(request, 'Please correct the following errors.')
+            return render(request, "demo/create.html", context={"form": data})
+
+
+class DeleteView(View):
+    def get(self, request, pk):
+        article = get_object_or_404(Article, id=pk)
+        context = {
+            "info": article
+        }
+        return render(request, "demo/delete.html", context)
+
+    def post(self, request, pk):
+        article = get_object_or_404(Article, id=pk)
+        article.delete()
+        messages.success(request, 'The post has been deleted successfully.')
+        return redirect("demo:home")
