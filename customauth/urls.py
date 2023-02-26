@@ -5,5 +5,5 @@ from customauth.views import HomeView
 app_name = "customauth"
 
 urlpatterns = [
-    path("index/", HomeView.as_view(), name="home")
+    path("login/", HomeView.as_view(), name="login")
 ]
