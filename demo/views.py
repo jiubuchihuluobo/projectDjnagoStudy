@@ -1,6 +1,8 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.decorators import method_decorator
 from django.views import View
 
 from demo.models import Article
@@ -17,6 +19,7 @@ class HomeView(View):
         return render(request, "demo/home.html", context)
 
 
+@method_decorator(login_required, name='dispatch')
 class CreateView(View):
     def get(self, request: HttpRequest):
         context = {
@@ -36,6 +39,7 @@ class CreateView(View):
             return render(request, "demo/create.html", context={"form": data})
 
 
+@method_decorator(login_required, name='dispatch')
 class EditView(View):
     def get(self, request: HttpRequest, pk):
         article = get_object_or_404(Article, id=pk)
@@ -59,6 +63,7 @@ class EditView(View):
             return render(request, "demo/create.html", context={"form": data})
 
 
+@method_decorator(login_required, name='dispatch')
 class DeleteView(View):
     def get(self, request, pk):
         article = get_object_or_404(Article, id=pk)

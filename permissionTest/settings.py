@@ -135,3 +135,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/4.1/topics/auth/customizing/
 
 AUTH_USER_MODEL = 'customauth.User'
+
+LOGIN_URL = 'myauth:login'
