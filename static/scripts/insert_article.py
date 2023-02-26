@@ -14,13 +14,13 @@ from customauth.models import User
 results = [
     {
         'title': 'Beautiful is better than ugly',
-        'author': 'John Doe',
+        'author': 'john',
         'content': 'Beautiful is better than ugly',
         'published_at': 'October 1, 2022'
     },
     {
         'title': 'Explicit is better than implicit',
-        'author': 'Jane Doe',
+        'author': 'jane',
         'content': 'Explicit is better than implicit',
         'published_at': 'October 1, 2022'
     }
