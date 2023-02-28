@@ -31,7 +31,9 @@ class CreateView(View):
         # 反序列化
         data = ArticleForm(data=request.POST)
         if data.is_valid():
-            data.save()
+            article = data.save(commit=False)
+            article.author = request.user
+            article.save()
             messages.success(request, 'The post has been created successfully.')
             return redirect("mydemo:home")
         else:

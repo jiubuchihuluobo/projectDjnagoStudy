@@ -7,7 +7,7 @@
         <small>Published on {{ post.published_at | date:"M d, Y" }} by {{ post.author | title }}</small>
         <p>{{ post.content }}</p>
         <p>
-            {% if request.user.is_authenticated %}
+            {% if request.user.is_authenticated and request.user == post.author %}
                 <a href="{% url 'mydemo:edit' post.id %}">Edit</a>
                 <a href="{% url 'mydemo:delete' post.id %}">Delete</a>
             {% endif %}

@@ -22,4 +22,5 @@ urlpatterns = [
     path("inner/", include("django.contrib.auth.urls")),
     path("account/", include("customauth.urls", namespace="myauth")),
     path("demo/", include("demo.urls", namespace="mydemo")),
+    path("todo/", include("todoapp.urls", namespace="todo")),
 ]
