@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.shortcuts import render, redirect, reverse
 from django.views import View
 
-from customauth.serializers import LoginForm
+from customauth.serializers import LoginForm, RegisterForm
 
 
 class HomeView(View):
@@ -40,3 +40,22 @@ class LogOutView(View):
         logout(request)
         messages.success(request, 'You have been logged out.')
         return redirect('myauth:login')
+
+
+class RegisterView(View):
+    def get(self, request):
+        form = RegisterForm()
+        return render(request, "customauth/register.html", {"form": form})
+
+    def post(self, request):
+        form = RegisterForm(data=request.POST)
+        if form.is_valid():
+            # commit = False并不会立即保存到数据库
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+            messages.success(request, 'You have singed up successfully.')
+            login(request, user)
+            return redirect("demo:home")
+        else:
+            return render(request, template_name="customauth/register.html", context={"form": form})

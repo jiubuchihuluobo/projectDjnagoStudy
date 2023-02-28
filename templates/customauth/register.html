@@ -1,0 +1,22 @@
+{% extends "demo_base.html" %}
+
+{% block content %}
+    <form method="POST" novalidate>
+        {% csrf_token %}
+        <h2>Sign Up</h2>
+        {% for field in form %}
+            <div>
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Register"/>
+        <p>Already has an account?<a href="{% url 'myauth:login' %}">Login</a></p>
+    </form>
+{% endblock content %}
