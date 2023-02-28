@@ -42,7 +42,8 @@ class CreateView(View):
 @method_decorator(login_required, name='dispatch')
 class EditView(View):
     def get(self, request: HttpRequest, pk):
-        article = get_object_or_404(Article, id=pk)
+        queryset = Article.objects.filter(author=request.user)
+        article = get_object_or_404(queryset, id=pk)
         context = {
             "id": pk,
             # 序列化
@@ -65,8 +66,9 @@ class EditView(View):
 
 @method_decorator(login_required, name='dispatch')
 class DeleteView(View):
-    def get(self, request, pk):
-        article = get_object_or_404(Article, id=pk)
+    def get(self, request: HttpRequest, pk):
+        queryset = Article.objects.filter(author=request.user)
+        article = get_object_or_404(queryset, id=pk)
         context = {
             "info": article
         }
