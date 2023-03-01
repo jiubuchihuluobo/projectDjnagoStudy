@@ -1,4 +1,9 @@
+import os
+
+from PIL import Image
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from customauth.models import User
 
@@ -15,3 +20,32 @@ class Task(models.Model):
 
     class Meta:
         ordering = ['completed']
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(default='avatar.jpg', upload_to='profile_avatars')
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+    def save(self, *args, **kwargs):
+        # 借助信号清空旧文件
+        for i in self.__class__.objects.all():
+            i.delete()
+        super().save(*args, **kwargs)
+        img = Image.open(self.avatar.path)
+        if img.height > 300 or img.width > 300 or img.height < 300 or img.width < 300:
+            output_size = (300, 300)
+            # 创建缩略图
+            img.thumbnail(output_size)
+            img.save(self.avatar.path)
+
+
+@receiver(pre_delete, sender=Profile)
+def avatar_delete(instance, *args, **kwargs):
+    if instance.avatar:
+        if os.path.isfile(instance.avatar.path) and "profile_avatars" in instance.avatar.path:
+            os.remove(instance.avatar.path)
+        else:
+            pass
