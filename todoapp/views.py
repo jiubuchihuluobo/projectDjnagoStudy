@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
@@ -12,17 +13,17 @@ class HomeView(View):
         return render(request, "todoapp/home.html")
 
 
-class TaskView(ListView):
+class TaskList(LoginRequiredMixin, ListView):
     model = Task
     context_object_name = 'tasks'
 
 
-class TaskDetail(DetailView):
+class TaskDetail(LoginRequiredMixin, DetailView):
     model = Task
     context_object_name = 'task'
 
 
-class TaskCreate(CreateView):
+class TaskCreate(LoginRequiredMixin, CreateView):
     # 指定要创建对象的类
     model = Task
     # 指定表单上显示的字段
@@ -37,7 +38,7 @@ class TaskCreate(CreateView):
         return super(TaskCreate, self).form_valid(form)
 
 
-class TaskUpdate(UpdateView):
+class TaskUpdate(LoginRequiredMixin, UpdateView):
     model = Task
     fields = ['title', 'description', 'completed']
     success_url = reverse_lazy('todoapp:tasks')
@@ -49,7 +50,7 @@ class TaskUpdate(UpdateView):
         return super(TaskUpdate, self).form_valid(form)
 
 
-class TaskDelete(DeleteView):
+class TaskDelete(LoginRequiredMixin, DeleteView):
     model = Task
     context_object_name = 'task'
     success_url = reverse_lazy('todoapp:tasks')

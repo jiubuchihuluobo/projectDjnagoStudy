@@ -1,8 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import LoginView
 from django.http import HttpRequest
 from django.shortcuts import render, redirect, reverse
+from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic import FormView
 
 from customauth.serializers import LoginForm, RegisterForm
 
@@ -59,3 +62,29 @@ class RegisterView(View):
             return redirect("demo:home")
         else:
             return render(request, template_name="customauth/register.html", context={"form": form})
+
+
+class MyLoginView(LoginView):
+    template_name = 'customauth/todo_login.html'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return reverse_lazy('todoapp:tasks')
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Invalid username or password')
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+class MyRegisterView(FormView):
+    template_name = 'customauth/todo_register.html'
+    form_class = RegisterForm
+    redirect_authenticated_user = True
+    success_url = reverse_lazy('todoapp:tasks')
+
+    def form_valid(self, form):
+        user = form.save()
+        if user:
+            login(self.request, user)
+
+        return super(MyRegisterView, self).form_valid(form)

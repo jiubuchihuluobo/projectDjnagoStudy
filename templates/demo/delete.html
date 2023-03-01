@@ -2,7 +2,6 @@
 
 {% block content %}
     <h2>Delete Post</h2>
-
     <form method="POST">
         {% csrf_token %}
         <p>Are you sure that you want to delete the "{{ info.title }}"?</p>
@@ -11,5 +10,4 @@
             <a href="{% url 'mydemo:home' %}">Cancel</a>
         </div>
     </form>
-
-{% endblock content %}
+{% endblock %}
