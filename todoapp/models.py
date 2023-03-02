@@ -30,7 +30,7 @@ class Profile(models.Model):
         return f'{self.user.username} Profile'
 
     def save(self, *args, **kwargs):
-        for i in self.__class__.objects.all():
+        for i in self.__class__.objects.filter(user__exact=self.user):
             i.delete()
         super().save(*args, **kwargs)
         if os.path.isfile(self.avatar.path):
