@@ -2,8 +2,6 @@ import os
 
 from PIL import Image
 from django.db import models
-from django.db.models.signals import pre_delete
-from django.dispatch import receiver
 
 from customauth.models import User
 
@@ -30,8 +28,7 @@ class Profile(models.Model):
         return f'{self.user.username} Profile'
 
     def save(self, *args, **kwargs):
-        for i in self.__class__.objects.filter(user__exact=self.user):
-            i.delete()
+        self.__class__.objects.filter(user__exact=self.user).delete()
         super().save(*args, **kwargs)
         if os.path.isfile(self.avatar.path):
             img = Image.open(self.avatar.path)
@@ -40,10 +37,3 @@ class Profile(models.Model):
                 # 创建缩略图
                 img.thumbnail(output_size)
                 img.save(self.avatar.path)
-
-
-@receiver(pre_delete, sender=Profile)
-def avatar_delete(instance, **kwargs):
-    if instance.avatar:
-        if os.path.isfile(instance.avatar.path) and "profile_avatars" in instance.avatar.path:
-            os.remove(instance.avatar.path)
