@@ -30,22 +30,20 @@ class Profile(models.Model):
         return f'{self.user.username} Profile'
 
     def save(self, *args, **kwargs):
-        # 借助信号清空旧文件
         for i in self.__class__.objects.all():
             i.delete()
         super().save(*args, **kwargs)
-        img = Image.open(self.avatar.path)
-        if img.height > 300 or img.width > 300 or img.height < 300 or img.width < 300:
-            output_size = (300, 300)
-            # 创建缩略图
-            img.thumbnail(output_size)
-            img.save(self.avatar.path)
+        if os.path.isfile(self.avatar.path):
+            img = Image.open(self.avatar.path)
+            if img.height > 300 or img.width > 300 or img.height < 300 or img.width < 300:
+                output_size = (300, 300)
+                # 创建缩略图
+                img.thumbnail(output_size)
+                img.save(self.avatar.path)
 
 
 @receiver(pre_delete, sender=Profile)
-def avatar_delete(instance, *args, **kwargs):
+def avatar_delete(instance, **kwargs):
     if instance.avatar:
         if os.path.isfile(instance.avatar.path) and "profile_avatars" in instance.avatar.path:
             os.remove(instance.avatar.path)
-        else:
-            pass
