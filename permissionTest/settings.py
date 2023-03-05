@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "demo",
     "todoapp",
     "hr",
+    "drfauth",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [

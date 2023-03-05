@@ -25,6 +25,7 @@ urlpatterns = [
     path("account/", include("customauth.urls", namespace="myauth")),
     path("demo/", include("demo.urls", namespace="mydemo")),
     path("todo/", include("todoapp.urls", namespace="todo")),
+    path("drf/", include("drfauth.urls", namespace="mydrf")),
 ]
 
 if settings.DEBUG:

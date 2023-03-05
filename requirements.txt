@@ -3,3 +3,6 @@ django-extensions
 psycopg2
 ipython
 Pillow
+djangorestframework
+markdown
+django-filter
