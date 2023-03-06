@@ -124,25 +124,35 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
-MEDIA_ROOT = BASE_DIR / 'media'
-
-MEDIA_URL = '/media/'
-
+# https://docs.djangoproject.com/en/4.1/ref/settings/#staticfiles-dirs
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# https://docs.djangoproject.com/en/4.1/ref/settings/#media-root
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# https://docs.djangoproject.com/en/4.1/ref/settings/#media-url
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Customizing authentication in Django
 # https://docs.djangoproject.com/en/4.1/topics/auth/customizing/
-
 AUTH_USER_MODEL = 'customauth.User'
 
+# https://docs.djangoproject.com/en/4.1/ref/settings/#login-url
 LOGIN_URL = 'myauth:mylogin'
+
+# https://www.django-rest-framework.org/api-guide/settings/#settings
+REST_FRAMEWORK = {
+    # https://www.django-rest-framework.org/api-guide/authentication/
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}

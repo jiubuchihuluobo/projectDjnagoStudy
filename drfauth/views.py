@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,12 @@ class RegisterView(APIView):
             return Response(data=serializer.errors)
 
 
-class LoginView(GenericAPIView):
-    def post(self):
-        ...
+class LoginTestView(GenericAPIView):
+    def post(self, request: Request):
+        user = authenticate(request, username=request.data.get("username"), password=request.data.get("password"))
+        if user:
+            login(request, user)
+            serializer = UserSerializer(instance=user)
+            return Response(data=serializer.data)
+        else:
+            return Response(data={"detail": "Password input error"})

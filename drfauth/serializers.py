@@ -54,14 +54,46 @@ class UserSerializer(serializers.Serializer):
         required=False,
     )
 
+    def is_valid(self, *, raise_exception=False):
+        assert hasattr(self, 'initial_data'), (
+            'Cannot call `.is_valid()` as no `data=` keyword argument was '
+            'passed when instantiating the serializer instance.'
+        )
+
+        if not hasattr(self, '_validated_data'):
+            try:
+                # 原始
+                self._validated_data = self.run_validation(self.initial_data)
+
+                # 注册
+                if (not self.context.get("request")) and (self._validated_data["password"] != self._validated_data.pop("confirm")):
+                    raise ValidationError("Password confirm error")
+
+                # 登陆
+                # if self.context.get("request") and self._validated_data.pop("password") == "":
+                #     self.instance = authenticate(
+                #         self.context.get("request"),
+                #         username=self._validated_data["username"],
+                #         password=self._validated_data["password"],
+                #     )
+                #     if not self.instance:
+                #         raise ValidationError("Password input error")
+            except ValidationError as exc:
+                self._validated_data = {}
+                self._errors = exc.detail
+            else:
+                self._errors = {}
+
+        if self._errors and raise_exception:
+            raise ValidationError(self.errors)
+
+        return not bool(self._errors)
+
     def update(self, instance, validated_data):
         raise NotImplementedError('`update()` must be implemented.')
 
     def create(self, validated_data: dict):
-        if validated_data.pop("confirm") == validated_data.get("password"):
-            user = User.objects.create_user(**validated_data)
-        else:
-            raise ValidationError("两次密码输入不一致")
+        user = User.objects.create_user(**validated_data)
         return user
 
 

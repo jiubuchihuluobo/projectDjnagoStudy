@@ -1,8 +1,9 @@
 Django==3.2.18
-django-extensions
 psycopg2
 ipython
 Pillow
-djangorestframework
 markdown
+djangorestframework
+django-extensions
 django-filter
+django-rest-knox
