@@ -6,4 +6,4 @@ class TodoappConfig(AppConfig):
     name = 'todoapp'
 
     def ready(self):
-        import todoapp.signal
+        pass

@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,6 +21,10 @@ class RegisterView(APIView):
 class LoginTestView(GenericAPIView):
     def post(self, request: Request):
         user = authenticate(request, username=request.data.get("username"), password=request.data.get("password"))
+        from rest_framework.authtoken.models import Token
+        token = Token.objects.create(user=user)
+        TokenAuthentication
+        print(token.key)
         if user:
             login(request, user)
             serializer = UserSerializer(instance=user)

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "hr",
     "drfauth",
     "rest_framework",
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -151,8 +152,8 @@ LOGIN_URL = 'myauth:mylogin'
 # https://www.django-rest-framework.org/api-guide/settings/#settings
 REST_FRAMEWORK = {
     # https://www.django-rest-framework.org/api-guide/authentication/
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ]
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.BasicAuthentication',
+    #     'rest_framework.authentication.SessionAuthentication',
+    # ]
 }
