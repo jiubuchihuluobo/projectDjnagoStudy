@@ -49,6 +49,10 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+
+    # 不检查csrf
+    "utils.middleware.DisableCsrfMiddleware",
+
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -150,10 +154,9 @@ AUTH_USER_MODEL = 'customauth.User'
 LOGIN_URL = 'myauth:mylogin'
 
 # https://www.django-rest-framework.org/api-guide/settings/#settings
-REST_FRAMEWORK = {
-    # https://www.django-rest-framework.org/api-guide/authentication/
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'rest_framework.authentication.BasicAuthentication',
-    #     'rest_framework.authentication.SessionAuthentication',
-    # ]
-}
+# REST_FRAMEWORK = {
+#     # https://www.django-rest-framework.org/api-guide/authentication/
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'utils.authentication.NoCsrfSessionAuthentication',
+#     ]
+# }
