@@ -154,9 +154,13 @@ AUTH_USER_MODEL = 'customauth.User'
 LOGIN_URL = 'myauth:mylogin'
 
 # https://www.django-rest-framework.org/api-guide/settings/#settings
-# REST_FRAMEWORK = {
-#     # https://www.django-rest-framework.org/api-guide/authentication/
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'utils.authentication.NoCsrfSessionAuthentication',
-#     ]
-# }
+REST_FRAMEWORK = {
+    # https://www.django-rest-framework.org/api-guide/authentication/
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'utils.authentication.NoCsrfSessionAuthentication',
+        'utils.authentication.BearerTokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+    ]
+}

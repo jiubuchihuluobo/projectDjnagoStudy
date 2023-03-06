@@ -1,4 +1,5 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login, authenticate
+from rest_framework.authtoken.models import Token
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,21 +9,45 @@ from drfauth.serializers import UserSerializer
 
 
 class RegisterView(APIView):
+    # throttle_classes = ()
+    # permission_classes = ()
+    # parser_classes = ()
+    # renderer_classes = ()
+    serializer_class = UserSerializer
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self,
+        }
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = self.get_serializer_context()
+        return self.serializer_class(*args, **kwargs)
+
     def post(self, request: Request):
-        serializer = UserSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+            login(request, user)
             return Response(data=serializer.data)
         else:
             return Response(data=serializer.errors)
 
 
 class LoginTestView(GenericAPIView):
+    serializer_class = UserSerializer
+
     def post(self, request: Request):
-        user = authenticate(request, username=request.data.get("username"), password=request.data.get("password"))
+        username = request.data["username"]
+        password = request.data["password"]
+        user = authenticate(request=request, username=username, password=password)
         if user:
-            login(request, user)
-            serializer = UserSerializer(instance=user)
-            return Response(data=serializer.data)
+            serializer = self.get_serializer(instance=user)
+            token, created = Token.objects.get_or_create(user=user)
+            response_data = serializer.data
+            response_data.update({"token": token.key})
+            return Response(response_data)
         else:
-            return Response(data={"detail": "Password input error"})
+            return Response({"status": "failure", "detail": "密码错误请重新输入"})

@@ -1,6 +1,7 @@
 from django.contrib.auth import validators
+from django.urls import reverse
+from django.utils.translation import gettext_lazy
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, CharField, DateTimeField, BooleanField, EmailField
 from rest_framework.validators import UniqueValidator
 
@@ -22,12 +23,14 @@ class UserSerializer(serializers.Serializer):
     is_active = BooleanField(help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', label='Active', required=False)
     date_joined = DateTimeField(required=False)
 
+    # 处理验证字段
     username = CharField(
         help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
         max_length=150,
         validators=[validators.UnicodeUsernameValidator(), UniqueValidator(queryset=User.objects.all())]
     )
 
+    # 处理关系字段
     # groups = PrimaryKeyRelatedField(
     #     help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
     #     many=True,
@@ -41,6 +44,7 @@ class UserSerializer(serializers.Serializer):
     #     required=False
     # )
 
+    # 处理关系字段
     groups = serializers.StringRelatedField(
         help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
         many=True,
@@ -54,44 +58,20 @@ class UserSerializer(serializers.Serializer):
         required=False,
     )
 
-    def is_valid(self, *, raise_exception=False):
-        assert hasattr(self, 'initial_data'), (
-            'Cannot call `.is_valid()` as no `data=` keyword argument was '
-            'passed when instantiating the serializer instance.'
-        )
+    # validate可以自定义验证
+    # validate可以编写视图函数的逻辑
+    def validate(self, attrs):
+        # 注册逻辑
+        if reverse("drfauth:register") == self.context.get("request").path:
+            if attrs["password"] != attrs.pop("confirm"):
+                msg = gettext_lazy('两次输入的密码不一致')
+                raise serializers.ValidationError(msg, code='authorization')
+        return attrs
 
-        if not hasattr(self, '_validated_data'):
-            try:
-                # 原始
-                self._validated_data = self.run_validation(self.initial_data)
-
-                # 注册
-                if (not self.context.get("request")) and (self._validated_data["password"] != self._validated_data.pop("confirm")):
-                    raise ValidationError("Password confirm error")
-
-                # 登陆
-                # if self.context.get("request") and self._validated_data.pop("password") == "":
-                #     self.instance = authenticate(
-                #         self.context.get("request"),
-                #         username=self._validated_data["username"],
-                #         password=self._validated_data["password"],
-                #     )
-                #     if not self.instance:
-                #         raise ValidationError("Password input error")
-            except ValidationError as exc:
-                self._validated_data = {}
-                self._errors = exc.detail
-            else:
-                self._errors = {}
-
-        if self._errors and raise_exception:
-            raise ValidationError(self.errors)
-
-        return not bool(self._errors)
-
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: dict):
         raise NotImplementedError('`update()` must be implemented.')
 
+    # 在create方法中删除无用的数据用来保存
     def create(self, validated_data: dict):
         user = User.objects.create_user(**validated_data)
         return user
