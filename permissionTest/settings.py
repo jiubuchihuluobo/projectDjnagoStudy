@@ -31,22 +31,31 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django原生
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # DRF原生
+    "rest_framework",
+    'rest_framework.authtoken'
+
+    # Django扩展
     "django_extensions",
+
+    # DRF扩展
+    # "knox",
+
+    # App
     "customauth",
     "demo",
     "todoapp",
     "hr",
     "drfauth",
-    # "knoxauth",
-    "rest_framework",
-    'rest_framework.authtoken'
-    # "knox"
+    "knoxauth",
 ]
 
 MIDDLEWARE = [
@@ -164,11 +173,11 @@ REST_FRAMEWORK = {
 
     # https://www.django-rest-framework.org/api-guide/authentication/
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'utils.authentication.NoCsrfSessionAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
+        # 'utils.authentication.NoCsrfSessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
-        # 'utils.authentication.BearerTokenAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
+        # 'utils.authentication.BearerTokenAuthentication',
         # "knox.auth.TokenAuthentication",
     ]
 }
