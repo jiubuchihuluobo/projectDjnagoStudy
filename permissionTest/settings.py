@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     "hr",
     "drfauth",
     "rest_framework",
-    'rest_framework.authtoken'
+    # 'rest_framework.authtoken'
+    "knox"
 ]
 
 MIDDLEWARE = [
@@ -51,7 +52,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 
     # 不检查csrf
-    "utils.middleware.DisableCsrfMiddleware",
+    # "utils.middleware.DisableCsrfMiddleware",
 
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -158,7 +159,8 @@ REST_FRAMEWORK = {
     # https://www.django-rest-framework.org/api-guide/authentication/
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'utils.authentication.NoCsrfSessionAuthentication',
-        'utils.authentication.BearerTokenAuthentication',
+        # 'utils.authentication.BearerTokenAuthentication',
+        "knox.auth.TokenAuthentication",
         # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
