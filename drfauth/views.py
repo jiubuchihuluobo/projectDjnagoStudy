@@ -1,6 +1,6 @@
 from django.contrib.auth import login, authenticate
+from django.views import View
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.views import Request
@@ -36,18 +36,21 @@ class RegisterView(APIView):
             return Response(data=serializer.errors)
 
 
-class LoginTestView(GenericAPIView):
+class LoginTestView(View):
     serializer_class = UserSerializer
 
     def post(self, request: Request):
         username = request.data["username"]
         password = request.data["password"]
+        user = request.user
         user = authenticate(request=request, username=username, password=password)
         if user:
-            serializer = self.get_serializer(instance=user)
+            # serializer = self.get_serializer(instance=user)
+            serializer = UserSerializer(instance=user)
             token, created = Token.objects.get_or_create(user=user)
             response_data = serializer.data
             response_data.update({"token": token.key})
+            login(request, user)
             return Response(response_data)
         else:
             return Response({"status": "failure", "detail": "密码错误请重新输入"})

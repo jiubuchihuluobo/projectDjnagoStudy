@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
+
+from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,9 +43,10 @@ INSTALLED_APPS = [
     "todoapp",
     "hr",
     "drfauth",
+    # "knoxauth",
     "rest_framework",
-    # 'rest_framework.authtoken'
-    "knox"
+    'rest_framework.authtoken'
+    # "knox"
 ]
 
 MIDDLEWARE = [
@@ -52,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 
     # 不检查csrf
-    # "utils.middleware.DisableCsrfMiddleware",
+    "utils.middleware.DisableCsrfMiddleware",
 
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -156,13 +159,40 @@ LOGIN_URL = 'myauth:mylogin'
 
 # https://www.django-rest-framework.org/api-guide/settings/#settings
 REST_FRAMEWORK = {
+    # https://www.django-rest-framework.org/api-guide/settings/#datetime_format
+    "DATETIME_FORMAT": "iso-8601",
+
     # https://www.django-rest-framework.org/api-guide/authentication/
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'utils.authentication.NoCsrfSessionAuthentication',
-        # 'utils.authentication.BearerTokenAuthentication',
-        "knox.auth.TokenAuthentication",
         # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
+        # 'utils.authentication.BearerTokenAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
+        # "knox.auth.TokenAuthentication",
     ]
+}
+
+# https://james1345.github.io/django-rest-knox/settings/
+REST_KNOX = {
+    # cryptography.hazmat.primitives.hashes.Whirlpool
+    # cryptography.hazmat.primitives.hashes.MD5
+    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+
+    # 设置0或负时间将创建立即过期的令牌
+    # 设置为None将创建永远不会过期的令牌
+    'TOKEN_TTL': timedelta(minutes=3),
+
+    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+
+    'TOKEN_LIMIT_PER_USER': None,
+
+    # 每次使用令牌时是否自动延期令牌
+    'AUTO_REFRESH': False,
+
+    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+
+    "AUTH_HEADER_PREFIX": "Bearer",
 }
