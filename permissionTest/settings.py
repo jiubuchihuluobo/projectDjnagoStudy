@@ -160,7 +160,7 @@ LOGIN_URL = 'myauth:mylogin'
 # https://www.django-rest-framework.org/api-guide/settings/#settings
 REST_FRAMEWORK = {
     # https://www.django-rest-framework.org/api-guide/settings/#datetime_format
-    "DATETIME_FORMAT": "iso-8601",
+    # "DATETIME_FORMAT": "iso-8601",
 
     # https://www.django-rest-framework.org/api-guide/authentication/
     'DEFAULT_AUTHENTICATION_CLASSES': [
