@@ -26,7 +26,7 @@ urlpatterns = [
     path("demo/", include("demo.urls", namespace="mydemo")),
     path("todo/", include("todoapp.urls", namespace="todo")),
     path("drf/", include("drfauth.urls", namespace="mydrf")),
-    # path("knox/", include("knoxauth.urls", namespace="authknox")),
+    path("knox/", include("knoxauth.urls", namespace="authknox")),
 ]
 
 if settings.DEBUG:
