@@ -178,7 +178,7 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
         # 'utils.authentication.BearerTokenAuthentication',
-        # "knox.auth.TokenAuthentication",
+        "knox.auth.TokenAuthentication",
     ]
 }
 
