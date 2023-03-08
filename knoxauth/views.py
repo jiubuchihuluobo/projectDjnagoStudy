@@ -1,4 +1,4 @@
-from knox.views import LoginView, LogoutView
+from knox.views import LoginView, LogoutView, LogoutAllView
 from rest_framework.authentication import BasicAuthentication
 
 
@@ -7,4 +7,8 @@ class KnoxLoginView(LoginView):
 
 
 class KnoxLogoutView(LogoutView):
+    ...
+
+
+class KnoxLogoutALLView(LogoutAllView):
     ...

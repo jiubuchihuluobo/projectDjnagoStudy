@@ -41,13 +41,13 @@ INSTALLED_APPS = [
 
     # DRF原生
     "rest_framework",
-    'rest_framework.authtoken'
+    # 'rest_framework.authtoken',
 
     # Django扩展
     "django_extensions",
 
     # DRF扩展
-    # "knox",
+    "knox",
 
     # App
     "customauth",
@@ -192,7 +192,7 @@ REST_KNOX = {
 
     # 设置0或负时间将创建立即过期的令牌
     # 设置为None将创建永远不会过期的令牌
-    'TOKEN_TTL': timedelta(minutes=3),
+    'TOKEN_TTL': timedelta(hours=1),
 
     'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 
