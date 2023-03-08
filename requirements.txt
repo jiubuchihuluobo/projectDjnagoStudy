@@ -7,3 +7,5 @@ djangorestframework
 django-extensions
 django-filter
 django-rest-knox
+djangorestframework-simplejwt
+drf-yasg

@@ -39,15 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Django扩展
+    "django_extensions",
+
     # DRF原生
     "rest_framework",
     # 'rest_framework.authtoken',
 
-    # Django扩展
-    "django_extensions",
-
     # DRF扩展
-    "knox",
+    # "knox",
+    "rest_framework_simplejwt",
+    'drf_yasg',
 
     # App
     "customauth",
@@ -55,7 +57,8 @@ INSTALLED_APPS = [
     "todoapp",
     "hr",
     "drfauth",
-    "knoxauth",
+    # "knoxauth",
+    "jwtauth",
 ]
 
 MIDDLEWARE = [
@@ -178,7 +181,8 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
         # 'utils.authentication.BearerTokenAuthentication',
-        "knox.auth.TokenAuthentication",
+        # "knox.auth.TokenAuthentication",
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
 
@@ -204,4 +208,52 @@ REST_KNOX = {
     'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
 
     "AUTH_HEADER_PREFIX": "Bearer",
+}
+
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html#settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    # 生成新的refresh token与access token
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    # User模型类last_login字段在登陆时更新
+    "UPDATE_LAST_LOGIN": False,
+
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    # 到期时间定义的回旋余地部分，这意味着您可以验证过去但不是很远的到期时间
+    "LEEWAY": 0,
+
+    # 授权头类型
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    # 授权头名称HTTP_X_ACCESS_TOKEN与HTTP_AUTHORIZATION
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    # 是否允许用户进行身份验证，默认规则是检查is_active标志
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    # claim中的令牌唯一标识符名称
+    "JTI_CLAIM": "jti",
+
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
+    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
+    "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
+    "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
