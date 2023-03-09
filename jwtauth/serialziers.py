@@ -26,8 +26,21 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = "__all__"
 
+    def validate(self, attrs):
+        if attrs.get("password") != attrs.pop("password_confirm"):
+            return serializers.ValidationError(detail="两次输入的密码不一致")
+        return attrs
 
-class MyTokenObtainPairSerializer(UserSerializer, TokenObtainPairSerializer):
+    def create(self, validated_data):
+        credentials = {
+            "username": validated_data.get("username"),
+            "password": validated_data.get("password"),
+        }
+        self.instance = self.Meta.model.objects.create_user(**credentials)
+        return self.instance
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer, UserSerializer):
     # 登陆不需要二次密码确认
     password_confirm = None
 
@@ -36,7 +49,7 @@ class MyTokenObtainPairSerializer(UserSerializer, TokenObtainPairSerializer):
         return cls.token_class.for_user(user)
 
     def validate(self, attrs):
-        token_data = super().validate(attrs)
+        token_data = super(MyTokenObtainPairSerializer, self).validate(attrs)
 
         # 欺骗serializer完成了is_valid
         self._validated_data = {}
@@ -47,9 +60,6 @@ class MyTokenObtainPairSerializer(UserSerializer, TokenObtainPairSerializer):
         merge_data = {**user_data, **token_data}
 
         return merge_data
-
-    def create(self, validated_data):
-        ...
 
     def update(self, instance, validated_data):
         ...
