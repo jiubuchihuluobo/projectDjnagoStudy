@@ -24,11 +24,11 @@ from rest_framework import permissions
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("inner/", include("django.contrib.auth.urls")),
+    # path("inner/", include("django.contrib.auth.urls")),
     path("account/", include("customauth.urls", namespace="myauth")),
-    path("demo/", include("demo.urls", namespace="mydemo")),
-    path("todo/", include("todoapp.urls", namespace="todo")),
-    path("drf/", include("drfauth.urls", namespace="mydrf")),
+    # path("demo/", include("demo.urls", namespace="mydemo")),
+    # path("todo/", include("todoapp.urls", namespace="todo")),
+    # path("drf/", include("drfauth.urls", namespace="mydrf")),
     # path("knox/", include("knoxauth.urls", namespace="authknox")),
     path("jwt/", include("jwtauth.urls", namespace="authjwt")),
 ]

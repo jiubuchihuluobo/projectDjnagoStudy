@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt import tokens
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
+from customauth.models import User
 from jwtauth.serialziers import UserSerializer
 
 
@@ -32,3 +33,11 @@ class RefreshView(TokenRefreshView):
 
 class MyTokenVerifyView(TokenVerifyView):
     ...
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.prefetch_related("outstandingtoken_set")
+
+    authentication_classes = []
+    permission_classes = []

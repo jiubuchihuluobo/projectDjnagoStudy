@@ -55,10 +55,10 @@ INSTALLED_APPS = [
 
     # App
     "customauth",
-    "demo",
+    # "demo",
     "todoapp",
-    "hr",
-    "drfauth",
+    # "hr",
+    # "drfauth",
     # "knoxauth",
     "jwtauth",
 ]
