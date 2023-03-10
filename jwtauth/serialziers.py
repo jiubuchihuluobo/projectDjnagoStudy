@@ -3,13 +3,38 @@ from rest_framework import serializers, relations
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
-from customauth.models import User
+from customauth.models import User, Tag
 
 
 class OutstandingTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = OutstandingToken
-        fields = "__all__"
+        fields = ["id", "jti", "created_at", "expires_at"]
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ["id", "name"]
+
+
+class TaggedObjectRelatedField(serializers.RelatedField):
+    """
+    A custom field to use for the `tagged_object` generic relationship.
+    """
+
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        """
+        Serialize tagged objects to a simple textual representation.
+        """
+        if isinstance(value, Tag):
+            serializer = TagSerializer(instance=value)
+        else:
+            raise Exception('Unexpected type of tagged object')
+        return serializer.data
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,12 +44,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     password_confirm = serializers.CharField(max_length=128, write_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
+
     groups = relations.PrimaryKeyRelatedField(
         help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
         many=True,
         queryset=models.Group.objects.all(),
         required=False,
     )
+
     user_permissions = relations.PrimaryKeyRelatedField(
         help_text='Specific permissions for this user.',
         many=True,
@@ -33,10 +60,14 @@ class UserSerializer(serializers.ModelSerializer):
     )
 
     # 自动生成的，反向关系必须在fields中直接声明，__all__并不会生成反向关系序列化字段
-    outstandingtoken_set = relations.HyperlinkedRelatedField(
+    outstandingtoken_set = OutstandingTokenSerializer(
         many=True,
         read_only=True,
-        view_name="jwtauth:user-detail"
+    )
+
+    tags = TaggedObjectRelatedField(
+        many=True,
+        read_only=True,
     )
 
     class Meta:
@@ -58,7 +89,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer, UserSerializer):
-    # 登陆不需要二次密码确认
+    # 跳过校验
     password_confirm = serializers.SkipField()
 
     @classmethod
