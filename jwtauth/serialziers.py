@@ -1,5 +1,15 @@
+from collections import OrderedDict
+from collections.abc import Mapping
+
 from django.contrib.auth import models
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers, relations
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import SkipField, get_error_detail, set_value
+from rest_framework.relations import PKOnlyObject
+from rest_framework.settings import api_settings
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
@@ -24,7 +34,7 @@ class TaggedObjectRelatedField(serializers.RelatedField):
     """
 
     def to_internal_value(self, data):
-        pass
+        return data
 
     def to_representation(self, value):
         """
@@ -67,7 +77,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     tags = TaggedObjectRelatedField(
         many=True,
-        read_only=True,
+        required=False,
+        queryset=Tag.objects.filter(content_type=ContentType.objects.get_for_model(model=User)),
+        validators=[UniqueValidator(queryset=ContentType.objects.get_for_model(model=User))],
     )
 
     class Meta:
@@ -75,8 +87,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-        if attrs.get("password") != attrs.pop("password_confirm"):
+
+        # 注册
+        if "register" in self.context["request"].path_info and \
+                attrs.get("password") != attrs.pop("password_confirm"):
             return serializers.ValidationError(detail="两次输入的密码不一致")
+
         return attrs
 
     def create(self, validated_data):
@@ -86,6 +102,82 @@ class UserSerializer(serializers.ModelSerializer):
         }
         self.instance = self.Meta.model.objects.create_user(**credentials)
         return self.instance
+
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+        """
+        ret = OrderedDict()
+        fields = self._readable_fields
+
+        for field in fields:
+
+            # 登陆或更新
+            if ("login" in self.context.get("request").path_info or self.context.get("request").method == "PUT") and \
+                    field.field_name == "outstandingtoken_set":
+                continue
+
+            try:
+                attribute = field.get_attribute(instance)
+            except SkipField:
+                continue
+
+            # We skip `to_representation` for `None` values so that fields do
+            # not have to explicitly deal with that case.
+            #
+            # For related fields with `use_pk_only_optimization` we need to
+            # resolve the pk value.
+            check_for_none = attribute.pk if isinstance(attribute, PKOnlyObject) else attribute
+            if check_for_none is None:
+                ret[field.field_name] = None
+            else:
+                ret[field.field_name] = field.to_representation(attribute)
+
+        return ret
+
+    def to_internal_value(self, data):
+        """
+        Dict of native values <- Dict of primitive datatypes.
+        """
+        if not isinstance(data, Mapping):
+            message = self.error_messages['invalid'].format(
+                datatype=type(data).__name__
+            )
+            raise ValidationError({
+                api_settings.NON_FIELD_ERRORS_KEY: [message]
+            }, code='invalid')
+
+        ret = OrderedDict()
+        errors = OrderedDict()
+        fields = self._writable_fields
+
+        for field in fields:
+
+            # 更新
+            if self.context.get("request").method == "PUT" and \
+                    "user_info" in self.context.get("request").path_info and \
+                    (field.field_name == 'password' or field.field_name == "password_confirm"):
+                continue
+
+            validate_method = getattr(self, 'validate_' + field.field_name, None)
+            primitive_value = field.get_value(data)
+            try:
+                validated_value = field.run_validation(primitive_value)
+                if validate_method is not None:
+                    validated_value = validate_method(validated_value)
+            except ValidationError as exc:
+                errors[field.field_name] = exc.detail
+            except DjangoValidationError as exc:
+                errors[field.field_name] = get_error_detail(exc)
+            except SkipField:
+                pass
+            else:
+                set_value(ret, field.source_attrs, validated_value)
+
+        if errors:
+            raise ValidationError(errors)
+
+        return ret
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer, UserSerializer):

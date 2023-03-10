@@ -1,7 +1,7 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework import mixins
+from rest_framework import response
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework_simplejwt import tokens
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
@@ -20,7 +20,7 @@ class RegisterViewSet(viewsets.ViewSetMixin, mixins.CreateModelMixin, generics.G
 
         refresh = tokens.RefreshToken.for_user(serializer.instance)
 
-        return Response({**serializer.data, **{"refresh": str(refresh), "access": str(refresh.access_token)}}, status=status.HTTP_201_CREATED, headers=headers)
+        return response.Response({**serializer.data, **{"refresh": str(refresh), "access": str(refresh.access_token)}}, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class LoginView(TokenObtainPairView):
@@ -39,5 +39,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.prefetch_related("outstandingtoken_set")
 
-    authentication_classes = []
-    permission_classes = []
+    # authentication_classes = []
+    permission_classes = [
+        # permissions.IsAuthenticated | permissions.DjangoModelPermissions
+        permissions.IsAuthenticated
+    ]

@@ -188,6 +188,10 @@ REST_FRAMEWORK = {
         # 'utils.authentication.BearerTokenAuthentication',
         # "knox.auth.TokenAuthentication",
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ]
 }
 
@@ -217,7 +221,7 @@ REST_KNOX = {
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html#settings
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     # 生成新的refresh token与access token
     "ROTATE_REFRESH_TOKENS": False,
