@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework import routers
 
-from jwtauth.views import LoginView, RefreshView, MyTokenVerifyView, RegisterViewSet, UserViewSet
+from jwtauth.views import LoginView, RefreshView, MyTokenVerifyView, RegisterViewSet, UserViewSet, UserTestViewSet
 
 app_name = "jwtauth"
 
@@ -14,5 +14,6 @@ urlpatterns = [
 
 router = routers.DefaultRouter()
 router.register(viewset=UserViewSet, prefix="user_info")
+router.register(viewset=UserTestViewSet, prefix="user_test")
 
 urlpatterns += router.urls

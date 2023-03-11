@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     # 'drf_yasg',
     'drf_spectacular',
+    'django_filters',
     'rest_framework_simplejwt.token_blacklist',
 
     # App
@@ -173,12 +174,15 @@ LOGIN_URL = 'myauth:mylogin'
 
 # https://www.django-rest-framework.org/api-guide/settings/#settings
 REST_FRAMEWORK = {
+    # 日期格式化标准
     # https://www.django-rest-framework.org/api-guide/settings/#datetime_format
     # "DATETIME_FORMAT": "iso-8601",
 
+    # OpenAPI
     # https://github.com/tfranzel/drf-spectacular
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
+    # 认证
     # https://www.django-rest-framework.org/api-guide/authentication/
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.SessionAuthentication',
@@ -190,11 +194,31 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 
+    # 权限
+    # https://www.django-rest-framework.org/api-guide/permissions/
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+
+    # 过滤
+    # https://www.django-rest-framework.org/api-guide/filtering/
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+    # 限流
+    # https://www.django-rest-framework.org/api-guide/throttling/
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/min',
+        'user': '10/min',
+        "contacts": "20/day",
+    }
 }
 
+# Token设置
 # https://james1345.github.io/django-rest-knox/settings/
 REST_KNOX = {
     # cryptography.hazmat.primitives.hashes.Whirlpool
@@ -219,6 +243,7 @@ REST_KNOX = {
     "AUTH_HEADER_PREFIX": "Bearer",
 }
 
+# Jwt设置
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html#settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
@@ -267,10 +292,82 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
+# OpenAPI设置
 # https://github.com/tfranzel/drf-spectacular
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Your Project API',
     'DESCRIPTION': 'Your project description',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+
+# 缓存设置
+# https://docs.djangoproject.com/zh-hans/4.1/topics/cache/#cache-arguments
+# Enable the alternate connection factory.
+# DJANGO_REDIS_CONNECTION_FACTORY = 'django_redis.pool.SentinelConnectionFactory'
+
+# These sentinels are shared between all the examples, and are passed
+# directly to redis Sentinel. These can also be defined inline.
+# SENTINELS = [
+#     ('sentinel-1', 26379),
+#     ('sentinel-2', 26379),
+#     ('sentinel-3', 26379),
+# ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        # The hostname in LOCATION is the primary (service / master) name
+        "LOCATION": "redis://default:2wsxCvgy7@localhost:6379/1",
+        "OPTIONS": {
+            # While the default client will work, this will check you
+            # have configured things correctly, and also create a
+            # primary and replica pool for the service specified by
+            # LOCATION rather than requiring two URLs.
+            # "CLIENT_CLASS": "django_redis.client.SentinelClient",
+
+            # Sentinels which are passed directly to redis Sentinel.
+            # "SENTINELS": SENTINELS,
+
+            # kwargs for redis Sentinel (optional).
+            # "SENTINEL_KWARGS": {},
+
+            # You can still override the connection pool (optional).
+            # "CONNECTION_POOL_CLASS": "redis.sentinel.SentinelConnectionPool",
+        },
+    },
+
+    # # A minimal example using the SentinelClient.
+    # "minimal": {
+    #     "BACKEND": "django_redis.cache.RedisCache",
+    #
+    #     # The SentinelClient will use this location for both the primaries
+    #     # and replicas.
+    #     "LOCATION": "redis://minimal_service_name/db",
+    #
+    #     "OPTIONS": {
+    #         "CLIENT_CLASS": "django_redis.client.SentinelClient",
+    #         "SENTINELS": SENTINELS,
+    #     },
+    # },
+    #
+    # # A minimal example using the DefaultClient.
+    # "other": {
+    #     "BACKEND": "django_redis.cache.RedisCache",
+    #     "LOCATION": [
+    #         # The DefaultClient is [primary, replicas...], but with the
+    #         # SentinelConnectionPool it only requires one "is_master=0".
+    #         "redis://other_service_name/db?is_master=1",
+    #         "redis://other_service_name/db?is_master=0",
+    #     ],
+    #     "OPTIONS": {"SENTINELS": SENTINELS},
+    # },
+    #
+    # # A minimal example only using only replicas in read only mode (and
+    # # the DefaultClient).
+    # "readonly": {
+    #     "BACKEND": "django_redis.cache.RedisCache",
+    #     "LOCATION": "redis://readonly_service_name/db?is_master=0",
+    #     "OPTIONS": {"SENTINELS": SENTINELS},
+    # },
 }

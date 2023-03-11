@@ -2,14 +2,12 @@ from collections import OrderedDict
 from collections.abc import Mapping
 
 from django.contrib.auth import models
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers, relations
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SkipField, get_error_detail, set_value
 from rest_framework.relations import PKOnlyObject
 from rest_framework.settings import api_settings
-from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
@@ -49,7 +47,7 @@ class TaggedObjectRelatedField(serializers.RelatedField):
 
 class UserSerializer(serializers.ModelSerializer):
     # https://www.django-rest-framework.org/api-guide/relations/#nested-relationships
-    # 模型类关系字段related_name未设置时，嵌套关系字段名字一定是反向模型类小写名字下划线set
+    # 模型类关系字段related_name未设置时，嵌套关系字段名字一定是反向模型类小写名字下划线set，嵌套序列化也为此名字
     # outstandingtoken_set = OutstandingTokenSerializer(many=True, read_only=True)
 
     password_confirm = serializers.CharField(max_length=128, write_only=True)
@@ -78,8 +76,7 @@ class UserSerializer(serializers.ModelSerializer):
     tags = TaggedObjectRelatedField(
         many=True,
         required=False,
-        queryset=Tag.objects.filter(content_type=ContentType.objects.get_for_model(model=User)),
-        validators=[UniqueValidator(queryset=ContentType.objects.get_for_model(model=User))],
+        read_only=True,
     )
 
     class Meta:
@@ -88,7 +85,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
 
-        # 注册
+        # 注册验证逻辑
         if "register" in self.context["request"].path_info and \
                 attrs.get("password") != attrs.pop("password_confirm"):
             return serializers.ValidationError(detail="两次输入的密码不一致")
@@ -112,7 +109,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         for field in fields:
 
-            # 登陆或更新
+            # 登陆或更新不展示outstandingtoken_set
             if ("login" in self.context.get("request").path_info or self.context.get("request").method == "PUT") and \
                     field.field_name == "outstandingtoken_set":
                 continue
@@ -152,13 +149,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = self._writable_fields
 
         for field in fields:
-
-            # 更新
-            if self.context.get("request").method == "PUT" and \
-                    "user_info" in self.context.get("request").path_info and \
-                    (field.field_name == 'password' or field.field_name == "password_confirm"):
-                continue
-
             validate_method = getattr(self, 'validate_' + field.field_name, None)
             primitive_value = field.get_value(data)
             try:
@@ -191,8 +181,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer, UserSerializer):
     def validate(self, attrs):
         token_data = super(MyTokenObtainPairSerializer, self).validate(attrs)
 
-        # 欺骗serializer完成了is_valid
+        # 欺骗serializer已经完成了is_valid
         self._validated_data = {}
+
         self.instance = self.user
         user_data = self.data
 
@@ -203,3 +194,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer, UserSerializer):
 
     def update(self, instance, validated_data):
         ...
+
+
+class TestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"

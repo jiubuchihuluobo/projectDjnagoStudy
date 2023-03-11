@@ -1,5 +1,8 @@
 Django==3.2.18
 psycopg2
+hiredis
+redis
+django-redis
 ipython
 Pillow
 markdown

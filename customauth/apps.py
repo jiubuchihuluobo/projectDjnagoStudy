@@ -6,4 +6,4 @@ class CustomauthConfig(AppConfig):
     name = 'customauth'
 
     def ready(self):
-        import customauth.signal
+        pass

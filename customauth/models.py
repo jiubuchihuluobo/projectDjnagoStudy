@@ -18,4 +18,4 @@ class Tag(models.Model):
 
 
 class User(AbstractUser):
-    tags = GenericRelation(Tag)
+    tags = GenericRelation(Tag, related_query_name="user")
