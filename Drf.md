@@ -3,10 +3,10 @@
 ##### 借助ModelSerializer快速创建一个Serializer
 
 ```python
-class UserSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = User
-    fields = "__all__"
+class GeneralUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
 
 
 serializer = UserSerilzier()

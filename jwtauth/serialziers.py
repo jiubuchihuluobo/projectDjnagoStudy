@@ -8,7 +8,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SkipField, get_error_detail, set_value
 from rest_framework.relations import PKOnlyObject
 from rest_framework.settings import api_settings
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from customauth.models import User, Tag
@@ -45,21 +44,22 @@ class TaggedObjectRelatedField(serializers.RelatedField):
         return serializer.data
 
 
-class UserSerializer(serializers.ModelSerializer):
-    # https://www.django-rest-framework.org/api-guide/relations/#nested-relationships
-    # 模型类关系字段related_name未设置时，嵌套关系字段名字一定是反向模型类小写名字下划线set，嵌套序列化也为此名字
-    # outstandingtoken_set = OutstandingTokenSerializer(many=True, read_only=True)
-
+class GeneralUserSerializer(serializers.ModelSerializer):
+    # 非模型类字段
     password_confirm = serializers.CharField(max_length=128, write_only=True)
-    password = serializers.CharField(max_length=128, write_only=True)
 
+    # 模型类不可编辑字段
+    password = serializers.CharField(max_length=128, write_only=True)
+    last_login = serializers.DateTimeField(read_only=True, allow_null=True, required=False)
+    date_joined = serializers.DateTimeField(read_only=True, required=False)
+
+    # 模型类关系字段
     groups = relations.PrimaryKeyRelatedField(
         help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
         many=True,
         queryset=models.Group.objects.all(),
         required=False,
     )
-
     user_permissions = relations.PrimaryKeyRelatedField(
         help_text='Specific permissions for this user.',
         many=True,
@@ -67,15 +67,23 @@ class UserSerializer(serializers.ModelSerializer):
         required=False,
     )
 
-    # 自动生成的，反向关系必须在fields中直接声明，__all__并不会生成反向关系序列化字段
+    # 模型类反向关系字段
+    # fields = "__all__" 并不会生成反向关系序列化字段，反向关系必须在fields中直接声明，才能自动生成
     outstandingtoken_set = OutstandingTokenSerializer(
         many=True,
         read_only=True,
     )
+    # https://www.django-rest-framework.org/api-guide/relations/#nested-relationships
+    # 模型类关系字段related_name未设置时，嵌套关系字段名字一定是反向模型类小写名字下划线set，嵌套序列化也为此名字
+    # outstandingtoken_set = OutstandingTokenSerializer(
+    #     many=True,
+    #     read_only=True
+    # )
 
+    # 模型类通用关系字段
+    # 通用关系中的反向关系必须在模型类中声明出来才能作为序列化字段
     tags = TaggedObjectRelatedField(
         many=True,
-        required=False,
         read_only=True,
     )
 
@@ -85,7 +93,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
 
-        # 注册验证逻辑
+        # 注册验证
         if "register" in self.context["request"].path_info and \
                 attrs.get("password") != attrs.pop("password_confirm"):
             return serializers.ValidationError(detail="两次输入的密码不一致")
@@ -109,9 +117,8 @@ class UserSerializer(serializers.ModelSerializer):
 
         for field in fields:
 
-            # 登陆或更新不展示outstandingtoken_set
-            if ("login" in self.context.get("request").path_info or self.context.get("request").method == "PUT") and \
-                    field.field_name == "outstandingtoken_set":
+            if field.field_name == "outstandingtoken_set" and \
+                    "login" in self.context.get("request").path_info:
                 continue
 
             try:
@@ -149,6 +156,11 @@ class UserSerializer(serializers.ModelSerializer):
         fields = self._writable_fields
 
         for field in fields:
+
+            if field.field_name == "password_confirm" and \
+                    "login" in self.context.get("request").path_info:
+                continue
+
             validate_method = getattr(self, 'validate_' + field.field_name, None)
             primitive_value = field.get_value(data)
             try:
@@ -170,33 +182,7 @@ class UserSerializer(serializers.ModelSerializer):
         return ret
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer, UserSerializer):
-    # 跳过校验
-    password_confirm = serializers.SkipField()
-
-    @classmethod
-    def get_token(cls, user):
-        return cls.token_class.for_user(user)
-
-    def validate(self, attrs):
-        token_data = super(MyTokenObtainPairSerializer, self).validate(attrs)
-
-        # 欺骗serializer已经完成了is_valid
-        self._validated_data = {}
-
-        self.instance = self.user
-        user_data = self.data
-
-        # 合并token信息与user信息
-        merge_data = {**user_data, **token_data}
-
-        return merge_data
-
-    def update(self, instance, validated_data):
-        ...
-
-
-class TestSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"

@@ -8,11 +8,12 @@ from rest_framework_simplejwt import tokens
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from customauth.models import User
-from jwtauth.serialziers import UserSerializer
+from jwtauth.serialziers import GeneralUserSerializer
+from utils.pagination import MyPageNumberPagination
 
 
 class RegisterViewSet(viewsets.ViewSetMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    serializer_class = UserSerializer
+    serializer_class = GeneralUserSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -22,7 +23,11 @@ class RegisterViewSet(viewsets.ViewSetMixin, mixins.CreateModelMixin, generics.G
 
         refresh = tokens.RefreshToken.for_user(serializer.instance)
 
-        return response.Response({**serializer.data, **{"refresh": str(refresh), "access": str(refresh.access_token)}}, status=status.HTTP_201_CREATED, headers=headers)
+        return response.Response(
+            data={**serializer.data, **{"refresh": str(refresh), "access": str(refresh.access_token)}},
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
 
 
 class LoginView(TokenObtainPairView):
@@ -40,14 +45,14 @@ class MyTokenVerifyView(TokenVerifyView):
 @method_decorator(decorator=cache_page(60), name="list")
 @method_decorator(decorator=cache_page(60), name="retrieve")
 class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = GeneralUserSerializer
     queryset = User.objects.prefetch_related("outstandingtoken_set")
 
     # 覆盖默认限流策略
     throttle_classes = []
 
-    # 范围限流
-    throttle_scope = 'contacts'
+    # 范围限流必须声明throttle_scope
+    # throttle_scope = 'contacts'
 
     authentication_classes = []
     permission_classes = []
@@ -55,8 +60,8 @@ class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = [
     #     # permissions.IsAuthenticated | permissions.DjangoModelPermissions
     #     # permissions.IsAuthenticated,
-    #     # IsOwnerOrReadOnly,
     #     # DjangoObjectPermissions,
+    #     # IsOwnerOrReadOnly,
     # ]
     # filterset_fields = ['id', 'username']
 
@@ -78,7 +83,7 @@ class UserTestViewSet(viewsets.ModelViewSet):
     permission_classes = []
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = GeneralUserSerializer
 
     # Search Filter
     # '^'从搜索开始。
@@ -87,6 +92,8 @@ class UserTestViewSet(viewsets.ModelViewSet):
     # '$'正则表达式搜索。
     filter_backends = [filters.SearchFilter]
     search_fields = ['@username']
+
+    pagination_class = MyPageNumberPagination
 
     def list(self, request, *args, **kwargs):
         # 获取原始查询集

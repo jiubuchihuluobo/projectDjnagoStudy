@@ -206,16 +206,16 @@ REST_FRAMEWORK = {
 
     # 限流
     # https://www.django-rest-framework.org/api-guide/throttling/
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-        'rest_framework.throttling.ScopedRateThrottle',
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/min',
-        'user': '10/min',
-        "contacts": "20/day",
-    }
+    # 'DEFAULT_THROTTLE_CLASSES': [
+    #     'rest_framework.throttling.AnonRateThrottle',
+    #     'rest_framework.throttling.UserRateThrottle',
+    #     'rest_framework.throttling.ScopedRateThrottle',
+    # ],
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     'anon': '5/min',
+    #     'user': '10/min',
+    #     "contacts": "20/day",
+    # }
 }
 
 # Token设置
@@ -231,7 +231,7 @@ REST_KNOX = {
     # 设置为None将创建永远不会过期的令牌
     'TOKEN_TTL': timedelta(hours=1),
 
-    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'USER_SERIALIZER': 'knox.serializers.GeneralUserSerializer',
 
     'TOKEN_LIMIT_PER_USER': None,
 
@@ -247,12 +247,12 @@ REST_KNOX = {
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html#settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     # 生成新的refresh token与access token
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
     # User模型类last_login字段在登陆时更新
-    "UPDATE_LAST_LOGIN": False,
+    "UPDATE_LAST_LOGIN": True,
 
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
@@ -284,7 +284,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 
-    "TOKEN_OBTAIN_SERIALIZER": "jwtauth.serialziers.MyTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "utils.serializers.MyTokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
     "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
